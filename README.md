@@ -1,243 +1,158 @@
-# ひとこと掲示板アプリ（GitHubレジュメ用サンプル）
+# 🗨 ひとこと掲示板アプリ
 
-MVCモデルに基づいたシンプルな掲示板アプリケーションの設計および実装コードです。
-Tomcat + JSP + Servlet + MySQL を想定しています。
+## 📌 アプリ概要
 
----
+ユーザーが名前と短いメッセージを投稿し、一覧表示できる掲示板アプリです。
+投稿・表示を通して、Webアプリケーションの基礎構造（MVCモデル）を学習
 
-## 📁 ディレクトリ構成例
+### 主な特徴
 
-```
-MutterApp/
-├── src/
-│   ├── controller/
-│   │   └── MainServlet.java
-│   ├── model/
-│   │   ├── Mutter.java
-│   │   └── MutterDAO.java
-├── WebContent/
-│   ├── main.jsp
-│   └── META-INF/
-│   └── WEB-INF/
-└── sql/
-    └── create_table.sql
-```
+* MVCモデル構成
+* DAOパターンによるDB操作分離
+* 投稿機能
+* 一覧表示
+* 入力値チェック
+* 拡張可能な設計
 
 ---
 
-## ① データベース設計（SQL）
+## 🧩 システム構成
 
-### create_table.sql
-
-```sql
-CREATE DATABASE mutter_db;
-USE mutter_db;
-
-CREATE TABLE MUTTER (
-  ID INT AUTO_INCREMENT PRIMARY KEY,
-  NAME VARCHAR(100) NOT NULL,
-  TEXT VARCHAR(255) NOT NULL,
-  TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+```
+[ ユーザー ]
+      ↓
+[ ブラウザ ]
+      ↓
+[ JSP（View） ] ← 表示
+      ↑
+[ サーブレット（Controller） ]
+      ↓
+[ DAO（Model） ]
+      ↓
+[ MySQL データベース ]
 ```
 
 ---
 
-## ② JavaBean（Mutter.java）
+## 🗃 データベース設計
 
-```java
-package model;
+### テーブル名：MUTTER
 
-import java.io.Serializable;
-import java.sql.Timestamp;
+| カラム名       | データ型         | 説明             |
+| ---------- | ------------ | -------------- |
+| id         | INT          | 投稿ID（主キー・自動採番） |
+| name       | VARCHAR(100) | 投稿者名           |
+| text       | VARCHAR(255) | 投稿内容           |
+| created_at | TIMESTAMP    | 投稿日時（自動設定）     |
 
-public class Mutter implements Serializable {
-    private int id;
-    private String name;
-    private String text;
-    private Timestamp timestamp;
+### 設計意図
 
-    public Mutter() {}
+* 各投稿を一意に識別するためIDを設定
+* 表示順制御のため日時を保存
+* 入力文字数を制限しDB負荷を回避
 
-    public Mutter(String name, String text) {
-        this.name = name;
-        this.text = text;
-    }
+---
 
-    public Mutter(int id, String name, String text, Timestamp timestamp) {
-        this.id = id;
-        this.name = name;
-        this.text = text;
-        this.timestamp = timestamp;
-    }
+## 🖥 画面設計
 
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public String getText() { return text; }
-    public Timestamp getTimestamp() { return timestamp; }
-}
+### メイン画面（main.jsp）
+
+構成要素：
+
+* タイトルエリア
+* 投稿フォーム
+
+  * 名前入力欄
+  * 本文入力欄
+  * 投稿ボタン
+* 投稿一覧エリア
+
+  * 投稿者名
+  * 投稿内容
+  * 投稿日時
+
+### 画面フロー
+
+```
+アクセス
+   ↓
+つぶやき一覧表示
+   ↓
+入力
+   ↓
+投稿
+   ↓
+再表示
 ```
 
 ---
 
-## ③ DAOクラス（MutterDAO.java）
+## ⚙ 機能設計
 
-```java
-package model;
+### Controller（MainServlet）
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+| メソッド   | 処理内容           |
+| ------ | -------------- |
+| doGet  | すべての投稿を取得し一覧表示 |
+| doPost | 投稿内容を受け取りDBへ登録 |
 
-public class MutterDAO {
-    private final String JDBC_URL = "jdbc:mysql://localhost:3306/mutter_db?characterEncoding=UTF-8";
-    private final String DB_USER = "root";
-    private final String DB_PASS = "password";
+### Model（MutterDAO）
 
-    // 全件取得
-    public List<Mutter> findAll() {
-        List<Mutter> mutterList = new ArrayList<>();
-
-        try (Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS)) {
-            String sql = "SELECT * FROM MUTTER ORDER BY ID DESC";
-            PreparedStatement pStmt = conn.prepareStatement(sql);
-            ResultSet rs = pStmt.executeQuery();
-
-            while (rs.next()) {
-                int id = rs.getInt("ID");
-                String name = rs.getString("NAME");
-                String text = rs.getString("TEXT");
-                Timestamp time = rs.getTimestamp("TIMESTAMP");
-
-                Mutter mutter = new Mutter(id, name, text, time);
-                mutterList.add(mutter);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return mutterList;
-    }
-
-    // 投稿登録
-    public void create(Mutter mutter) {
-        try (Connection conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS)) {
-            String sql = "INSERT INTO MUTTER(NAME, TEXT) VALUES(?, ?)";
-            PreparedStatement pStmt = conn.prepareStatement(sql);
-            pStmt.setString(1, mutter.getName());
-            pStmt.setString(2, mutter.getText());
-            pStmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
+| メソッド      | 処理内容  |
+| --------- | ----- |
+| findAll() | 全投稿取得 |
+| create()  | 投稿登録  |
 
 ---
 
-## ④ コントローラ（MainServlet.java）
+## ✅ 入力バリデーション仕様
 
-```java
-package controller;
+| 項目 | ルール            |
+| -- | -------------- |
+| 名前 | 空白不可 / 最大100文字 |
+| 本文 | 空白不可 / 最大255文字 |
 
-import model.Mutter;
-import model.MutterDAO;
-
-import javax.servlet.*;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.util.List;
-
-@WebServlet("/Main")
-public class MainServlet extends HttpServlet {
-
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        MutterDAO dao = new MutterDAO();
-        List<Mutter> mutterList = dao.findAll();
-
-        request.setAttribute("mutterList", mutterList);
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/main.jsp");
-        dispatcher.forward(request, response);
-    }
-
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        request.setCharacterEncoding("UTF-8");
-        String name = request.getParameter("name");
-        String text = request.getParameter("text");
-
-        if(name != null && !name.isEmpty() && text != null && !text.isEmpty()){
-            Mutter mutter = new Mutter(name, text);
-            MutterDAO dao = new MutterDAO();
-            dao.create(mutter);
-        }
-
-        response.sendRedirect("Main");
-    }
-}
-```
+エラー時は画面上にメッセージ表示。
 
 ---
 
-## ⑤ View（main.jsp）
+## 🎨 UIデザイン方針
 
-```jsp
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="java.util.List" %>
-<%@ page import="model.Mutter" %>
+* 背景：淡いグレー
+* メインカード：白
+* フォント：丸ゴシック
+* ボタン：グラデーションブルー
 
-<html>
-<head>
-<title>ひとこと掲示板</title>
-</head>
-<body>
-<h1>ひとこと掲示板</h1>
+雰囲気：
 
-<form action="Main" method="post">
-    名前：<input type="text" name="name"><br>
-    ひとこと：<input type="text" name="text"><br>
-    <input type="submit" value="投稿">
-</form>
-
-<hr>
-<h2>投稿一覧</h2>
-
-<%
-List<Mutter> list = (List<Mutter>)request.getAttribute("mutterList");
-for(Mutter m : list){
-%>
-<p>
-<strong><%= m.getName() %></strong>：<%= m.getText() %>
-（<%= m.getTimestamp() %>）
-</p>
-<% } %>
-
-</body>
-</html>
-```
+> シンプル / 親しみやすい / モダン
 
 ---
 
-## ✅ 技術ポイント（レジュメ用）
+## 🔐 セキュリティ対策
 
-* Java Servlet + JSP を使用したMVC構成
-* DAOパターンによるデータベース分離設計
-* MySQLによるデータ永続化
-* POST/GETの役割分離
-* 入力バリデーション実装
-* GitHubポートフォリオに最適なシンプル構成
+* SQLインジェクション防止（PreparedStatement）
+* XSS対策（HTMLエスケープ）
+* 入力値フィルタリング
 
 ---
 
-必要であれば：
-✅ README.md 用の文章
-✅ GitHubに載せる説明文
-✅ デザイン付きCSS版
-✅ 改良版（ログイン機能付き）
+## 🚀 今後の拡張案
 
-も作成できます。希望があれば教えてください！
+* 編集機能
+* 削除機能
+* ユーザー登録 / ログイン
+* 画像投稿
+* いいね機能
+* ページネーション
+* モバイル対応
+
+---
+
+## 🧪 テスト項目例
+
+* 空欄投稿
+* 長文投稿
+* 連続投稿
+* 特殊文字入力
+
