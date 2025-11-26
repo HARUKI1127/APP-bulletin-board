@@ -77,17 +77,19 @@
             box-sizing: border-box;
         }
 
-        input[type=submit] {
-            padding: 10px 20px;
+        input[type=submit], .btn-link {
+            padding: 6px 12px;
             background: var(--primary);
             color: #fff;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        input[type=submit]:hover {
+        input[type=submit]:hover, .btn-link:hover {
             background: var(--primary-hover);
         }
 
@@ -118,12 +120,12 @@
 
         a {
             color: var(--primary);
-            text-decoration: none;
         }
 
         a:hover {
             text-decoration: underline;
         }
+
     </style>
 
     <script>
@@ -136,6 +138,11 @@
             if (localStorage.getItem("darkMode") === "true") {
                 document.body.classList.add("dark");
             }
+        }
+
+        // 削除確認用
+        function confirmDelete() {
+            return confirm('本当にこの投稿を削除しますか？');
         }
     </script>
 </head>
@@ -185,8 +192,13 @@
                 <td>${mutter.name}</td>
                 <td>${mutter.text}</td>
                 <td>${mutter.timestamp}</td>
-                <td><a href="${pageContext.request.contextPath}/Edit?id=${mutter.id}">編集</a></td>
-                <td><a href="${pageContext.request.contextPath}/Delete?id=${mutter.id}">削除</a></td>
+                <td>
+                    <a class="btn-link" href="${pageContext.request.contextPath}/Edit?id=${mutter.id}">編集</a>
+                </td>
+                <td>
+                    <a class="btn-link" href="${pageContext.request.contextPath}/Delete?id=${mutter.id}" 
+                       onclick="return confirmDelete();">削除</a>
+                </td>
             </tr>
         </c:forEach>
         </tbody>
@@ -195,4 +207,3 @@
 </div>
 </body>
 </html>
-
