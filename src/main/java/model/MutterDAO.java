@@ -25,24 +25,18 @@ public class MutterDAO {
     }
 
     /** ------------------------------
-     *  ID / TIMESTAMP も取得できる完全版 findAll
+     * 全件取得
      * ------------------------------ */
     public List<Mutter> findAll() {
         List<Mutter> mutterList = new ArrayList<>();
         Connection conn = null;
 
         try {
-            // データベース接続
             conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
-
-            // SQL
             String sql = "SELECT ID, NAME, TEXT, TIMESTAMP FROM MUTTER ORDER BY ID DESC";
             PreparedStatement pStmt = conn.prepareStatement(sql);
-
-            // 実行
             ResultSet rs = pStmt.executeQuery();
 
-            // 結果をリストに追加
             while (rs.next()) {
                 int id = rs.getInt("ID");
                 String userName = rs.getString("NAME");
@@ -59,11 +53,7 @@ public class MutterDAO {
 
         } finally {
             if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
             }
         }
 
@@ -71,7 +61,7 @@ public class MutterDAO {
     }
 
     /** ------------------------------
-     *  投稿の追加
+     * 投稿の追加
      * ------------------------------ */
     public boolean create(Mutter mutter) {
         String sql = "INSERT INTO MUTTER (NAME, TEXT, TIMESTAMP) VALUES (?, ?, NOW())";
@@ -89,4 +79,93 @@ public class MutterDAO {
             return false;
         }
     }
+
+    /** ------------------------------
+     * ID指定で1件取得
+     * ------------------------------ */
+    public Mutter findOne(int id) {
+        Mutter mutter = null;
+        Connection conn = null;
+
+        try {
+            conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
+            String sql = "SELECT ID, NAME, TEXT, TIMESTAMP FROM MUTTER WHERE ID = ?";
+            PreparedStatement pStmt = conn.prepareStatement(sql);
+            pStmt.setInt(1, id);
+            ResultSet rs = pStmt.executeQuery();
+
+            if (rs.next()) {
+                String userName = rs.getString("NAME");
+                String text = rs.getString("TEXT");
+                Timestamp timestamp = rs.getTimestamp("TIMESTAMP");
+                mutter = new Mutter(id, userName, text, timestamp);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        } finally {
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+
+        return mutter;
+    }
+
+    /** ------------------------------
+     * 投稿の更新
+     * ------------------------------ */
+    public boolean update(Mutter mutter) {
+        String sql = "UPDATE MUTTER SET NAME = ?, TEXT = ? WHERE ID = ?";
+        Connection conn = null;
+
+        try {
+            conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
+            PreparedStatement pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, mutter.getName());
+            pStmt.setString(2, mutter.getText());
+            pStmt.setInt(3, mutter.getId());
+
+            int result = pStmt.executeUpdate();
+            return (result == 1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+    }
+
+    /** ------------------------------
+     * 投稿の削除
+     * ------------------------------ */
+    public boolean delete(int id) {
+        Connection conn = null;
+        try {
+            // データベースへ接続
+            conn = DriverManager.getConnection(JDBC_URL, DB_USER, DB_PASS);
+            // DELETE文の準備
+            String sql = "DELETE FROM MUTTER WHERE ID = ?";
+            PreparedStatement pStmt = conn.prepareStatement(sql);
+            // DELETE文中の「?」に値を設定
+            pStmt.setInt(1, id);
+            // DELETE文を実行
+            int result = pStmt.executeUpdate();
+            return (result == 1); // 成功すればtrue
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            // データベース切断
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+    }
 }
+

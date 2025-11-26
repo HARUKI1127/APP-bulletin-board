@@ -5,7 +5,6 @@
 <head>
     <meta charset="UTF-8">
     <title>つぶやき掲示板</title>
-
     <style>
         :root {
             --bg: #f5f5f5;
@@ -13,14 +12,12 @@
             --card-bg: #fff;
             --border: #ddd;
         }
-
         body.dark {
             --bg: #1a1a1a;
             --text: #eee;
             --card-bg: #2a2a2a;
             --border: #444;
         }
-
         body {
             font-family: "Arial", sans-serif;
             background: var(--bg);
@@ -29,22 +26,9 @@
             padding: 20px;
             transition: background 0.3s, color 0.3s;
         }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-        }
-
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .toggle {
-            text-align: right;
-            margin-bottom: 10px;
-        }
-
+        .container { max-width: 800px; margin: auto; }
+        h1, h2 { text-align: center; }
+        .toggle { text-align: right; margin-bottom: 10px; }
         button.mode-btn {
             padding: 6px 12px;
             background: var(--card-bg);
@@ -53,18 +37,14 @@
             color: var(--text);
             border-radius: 6px;
         }
-
-        .card {
+        .card, .post {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
             border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-
-        input[type=text],
-        textarea {
+        input[type=text], textarea {
             width: 100%;
             padding: 10px;
             margin: 6px 0 12px;
@@ -73,7 +53,6 @@
             background: var(--bg);
             color: var(--text);
         }
-
         input[type=submit] {
             padding: 10px 20px;
             background: #3b82f6;
@@ -82,47 +61,12 @@
             border-radius: 6px;
             cursor: pointer;
         }
-
-        input[type=submit]:hover {
-            background: #2563eb;
-        }
-
-        .post {
-            background: var(--card-bg);
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border);
-        }
-
-        .name {
-            font-weight: bold;
-            color: #3b82f6;
-        }
-
-        .error {
-            color: #ff5555;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        /* ★ テーブルのデザイン追加 ★ */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        table th, table td {
-            border: 1px solid var(--border);
-            padding: 8px;
-            background: var(--card-bg);
-        }
-
-        table th {
-            background: #3b82f6;
-            color: white;
-        }
+        input[type=submit]:hover { background: #2563eb; }
+        .name { font-weight: bold; color: #3b82f6; }
+        .error { color: #ff5555; font-weight: bold; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        table th, table td { border: 1px solid var(--border); padding: 8px; background: var(--card-bg); }
+        table th { background: #3b82f6; color: white; }
     </style>
 
     <script>
@@ -130,7 +74,6 @@
             document.body.classList.toggle("dark");
             localStorage.setItem("darkMode", document.body.classList.contains("dark"));
         }
-
         window.onload = function() {
             if (localStorage.getItem("darkMode") === "true") {
                 document.body.classList.add("dark");
@@ -155,32 +98,20 @@
         <form action="Main" method="post">
             <label>名前：</label>
             <input type="text" name="userName" />
-
             <label>つぶやき：</label>
             <textarea name="text" rows="3"></textarea>
-
             <input type="submit" value="投稿" />
         </form>
     </div>
 
-    <h2>投稿一覧（カード表示）</h2>
-
-    <c:forEach var="m" items="${mutterList}">
-        <div class="post">
-            <span class="name">${m.name}</span>： ${m.text}
-        </div>
-    </c:forEach>
-
-    <hr>
-
     <h2>投稿一覧（テーブル表示）</h2>
-
-    <table>
+    <table border="1">
         <tr>
             <th>ID</th>
             <th>投稿者</th>
             <th>内容</th>
             <th>投稿日時</th>
+            <th colspan="2">操作</th> <%-- 2列に拡張 --%>
         </tr>
 
         <c:forEach var="mutter" items="${mutterList}">
@@ -189,10 +120,11 @@
                 <td>${mutter.name}</td>
                 <td>${mutter.text}</td>
                 <td>${mutter.timestamp}</td>
+                <td><a href="/mutter-app/Edit?id=${mutter.id}">編集</a></td>
+                <td><a href="/mutter-app/Delete?id=${mutter.id}">削除</a></td>
             </tr>
         </c:forEach>
     </table>
-
 </div>
 </body>
 </html>
