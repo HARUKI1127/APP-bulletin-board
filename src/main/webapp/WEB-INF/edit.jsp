@@ -8,7 +8,7 @@
 <body>
     <h1>ひとこと編集</h1>
 
-    <form action="/mutter-app/Edit" method="post">
+    <form action="/bulletin-board/Edit" method="post">
         <%-- 更新対象のIDを隠しフィールドで送信 --%>
         <input type="hidden" name="id" value="${mutter.id}">
 
@@ -21,6 +21,6 @@
         <input type="submit" value="更新">
     </form>
 
-    <p><a href="/mutter-app/Main">メイン画面に戻る</a></p>
+    <p><a href="/bulletin-board/Main">メイン画面に戻る</a></p>
 </body>
 </html>

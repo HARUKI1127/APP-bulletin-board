@@ -62,7 +62,6 @@
             cursor: pointer;
         }
         input[type=submit]:hover { background: #2563eb; }
-        .name { font-weight: bold; color: #3b82f6; }
         .error { color: #ff5555; font-weight: bold; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         table th, table td { border: 1px solid var(--border); padding: 8px; background: var(--card-bg); }
@@ -84,6 +83,7 @@
 
 <body>
 <div class="container">
+
     <div class="toggle">
         <button class="mode-btn" onclick="toggleMode()">🌙 / ☀️ モード切替</button>
     </div>
@@ -94,8 +94,9 @@
         <p class="error">${errorMsg}</p>
     </c:if>
 
+    <!-- 投稿フォーム -->
     <div class="card">
-        <form action="Main" method="post">
+        <form action="${pageContext.request.contextPath}/Main" method="post">
             <label>名前：</label>
             <input type="text" name="userName" />
             <label>つぶやき：</label>
@@ -104,14 +105,15 @@
         </form>
     </div>
 
-    <h2>投稿一覧（テーブル表示）</h2>
-    <table border="1">
+    <h2>投稿一覧</h2>
+
+    <table>
         <tr>
             <th>ID</th>
             <th>投稿者</th>
             <th>内容</th>
             <th>投稿日時</th>
-            <th colspan="2">操作</th> <%-- 2列に拡張 --%>
+            <th colspan="2">操作</th>
         </tr>
 
         <c:forEach var="mutter" items="${mutterList}">
@@ -120,11 +122,21 @@
                 <td>${mutter.name}</td>
                 <td>${mutter.text}</td>
                 <td>${mutter.timestamp}</td>
-                <td><a href="/mutter-app/Edit?id=${mutter.id}">編集</a></td>
-                <td><a href="/mutter-app/Delete?id=${mutter.id}">削除</a></td>
+
+                <!-- 編集リンク（404防止版） -->
+                <td>
+                    <a href="${pageContext.request.contextPath}/Edit?id=${mutter.id}">編集</a>
+                </td>
+
+                <!-- 削除リンク（404防止版） -->
+                <td>
+                    <a href="${pageContext.request.contextPath}/Delete?id=${mutter.id}">削除</a>
+                </td>
             </tr>
         </c:forEach>
+
     </table>
 </div>
 </body>
 </html>
+
