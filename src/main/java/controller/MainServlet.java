@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import model.Mutter;
 import model.MutterDAO;
-
 
 @WebServlet("/Main")
 public class MainServlet extends HttpServlet {
@@ -26,16 +26,22 @@ public class MainServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        MutterDAO dao = new MutterDAO();
-        List<Mutter> list = dao.findAll();
-        if (list == null) {
-            list = new ArrayList<>();
-        }
-        request.setAttribute("mutterList", list);
+        // DAOを呼び出して、つぶやきリストを取得
+        MutterDAO mutterDAO = new MutterDAO();
+        List<Mutter> mutterList = mutterDAO.findAll();
 
-        // JSPにフォワード
-        request.getRequestDispatcher("/WEB-INF/main.jsp").forward(request, response);
+        if (mutterList == null) {
+            mutterList = new ArrayList<>();
+        }
+
+        request.setAttribute("mutterList", mutterList);
+
+        // フォワード先を「/WEB-INF/main.jsp」に修正
+        String forwardPath = "/WEB-INF/main.jsp";
+        RequestDispatcher dispatcher = request.getRequestDispatcher(forwardPath);
+        dispatcher.forward(request, response);
     }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -56,6 +62,7 @@ public class MainServlet extends HttpServlet {
             request.setAttribute("errorMsg", "名前とつぶやきを入力してください。");
         }
 
+        // doGet を呼び出してリスト再表示
         doGet(request, response);
     }
 }
