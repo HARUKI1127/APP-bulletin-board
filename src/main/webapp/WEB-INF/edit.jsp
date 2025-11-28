@@ -31,7 +31,6 @@
         }
 
         .container { max-width: 800px; margin: auto; }
-
         h1 { text-align: center; margin-bottom: 20px; }
 
         .toggle { text-align: right; margin-bottom: 15px; }
@@ -94,6 +93,7 @@
         }
     </script>
 </head>
+
 <body>
 <div class="container">
 
@@ -103,6 +103,7 @@
 
     <h1>ひとこと編集</h1>
 
+    <!-- ★ フォームは1つだけにする -->
     <div class="card">
         <form action="${pageContext.request.contextPath}/Edit" method="post">
             <input type="hidden" name="id" value="${mutter.id}">
@@ -111,14 +112,13 @@
             <input type="text" name="name" value="${mutter.name}">
 
             <label>内容：</label>
-            <input type="text" name="text" value="${mutter.text}">
+            <input type="text" name="text" value="${mutter.text}" size="60">
 
             <input type="submit" value="更新">
         </form>
-
-        <p><a class="button" href="${pageContext.request.contextPath}/Main">メイン画面に戻る</a></p>
     </div>
 
+    <p><a class="button" href="${pageContext.request.contextPath}/Main">メイン画面に戻る</a></p>
 </div>
 </body>
 </html>
