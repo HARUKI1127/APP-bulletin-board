@@ -5,6 +5,10 @@
 <head>
     <meta charset="UTF-8">
     <title>つぶやき掲示板</title>
+    <!-- Font Awesome & Material Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <style>
         :root {
             --bg: #f5f5f5;
@@ -13,119 +17,96 @@
             --border: #ddd;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
-            --error: #ff5555;
+            --sidebar-bg: #ffffff;
+            --sidebar-border: #ccc;
         }
-
         body.dark {
             --bg: #1a1a1a;
             --text: #eee;
             --card-bg: #2a2a2a;
             --border: #444;
+            --sidebar-bg: #202020;
+            --sidebar-border: #555;
         }
-
         body {
             font-family: "Arial", sans-serif;
             background: var(--bg);
             color: var(--text);
             margin: 0;
-            padding: 20px;
-            transition: background 0.3s, color 0.3s;
+            display: flex;
+            transition: 0.3s;
         }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
+        /* ===== サイドバー ===== */
+        .sidebar {
+            width: 220px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--sidebar-border);
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
         }
-
-        h1, h2 {
+        .sidebar h2 {
             text-align: center;
+            margin-bottom: 20px;
         }
-
-        .toggle {
-            text-align: right;
-            margin-bottom: 15px;
-        }
-
-        button.mode-btn {
-            padding: 6px 14px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
+        .sidebar a {
+            display: block;
+            padding: 12px 20px;
             color: var(--text);
-            border-radius: 6px;
-            font-size: 14px;
+            text-decoration: none;
+            font-size: 15px;
+        }
+        .sidebar a:hover {
+            background: var(--border);
+        }
+        .sidebar i, .sidebar .material-icons {
+            margin-right: 8px;
+        }
+
+        /* ===== コンテンツ領域 ===== */
+        .content {
+            margin-left: 220px;
+            padding: 20px;
+            width: calc(100% - 220px);
         }
 
         .card {
             background: var(--card-bg);
             padding: 20px;
             border-radius: 10px;
-            margin-bottom: 25px;
             border: 1px solid var(--border);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
         }
-
-        input[type=text], textarea {
+        input, textarea {
             width: 100%;
             padding: 10px;
-            margin: 6px 0 12px;
-            border: 1px solid var(--border);
+            margin-top: 5px;
             border-radius: 6px;
+            border: 1px solid var(--border);
             background: var(--bg);
             color: var(--text);
-            font-size: 14px;
-            box-sizing: border-box;
         }
-
-        input[type=submit], .btn-link {
-            padding: 6px 12px;
+        .btn {
+            padding: 8px 16px;
             background: var(--primary);
             color: #fff;
-            border: none;
             border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
             text-decoration: none;
             display: inline-block;
         }
-
-        input[type=submit]:hover, .btn-link:hover {
+        .btn:hover {
             background: var(--primary-hover);
         }
-
-        .error {
-            color: var(--error);
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 14px;
         }
-
-        table th, table td {
+        th, td {
             border: 1px solid var(--border);
             padding: 10px;
-            background: var(--card-bg);
-            text-align: left;
         }
-
-        table th {
-            background: var(--primary);
-            color: #fff;
-        }
-
-        a {
-            color: var(--primary);
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
+        th { background: var(--primary); color: white; }
     </style>
 
     <script>
@@ -133,75 +114,60 @@
             document.body.classList.toggle("dark");
             localStorage.setItem("darkMode", document.body.classList.contains("dark"));
         }
-
-        window.onload = function() {
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark");
-            }
-        }
-
-        // 削除確認用
-        function confirmDelete() {
-            return confirm('本当にこの投稿を削除しますか？');
+        window.onload = () => {
+            if (localStorage.getItem("darkMode") === "true") document.body.classList.add("dark");
         }
     </script>
 </head>
-
 <body>
-<div class="container">
 
-    <div class="toggle">
-        <button class="mode-btn" onclick="toggleMode()">🌙 / ☀️ モード切替</button>
+<!-- ===== サイドバー ===== -->
+<div class="sidebar">
+    <h2><i class="fa-solid fa-comments"></i> 管理</h2>
+    <a href="${pageContext.request.contextPath}/Main"><i class="fa-solid fa-home"></i> メイン</a>
+    <a href="#"><i class="fa-solid fa-user"></i> ユーザー管理</a>
+    <a href="#"><i class="fa-solid fa-database"></i> 投稿データ</a>
+    <a href="#"><i class="material-icons">settings</i> 設定</a>
+    <a href="#"><i class="fa-solid fa-right-from-bracket"></i> ログアウト</a>
+</div>
+
+<!-- ===== メインコンテンツ ===== -->
+<div class="content">
+
+    <div style="text-align:right; margin-bottom:10px;">
+        <button class="btn" onclick="toggleMode()"><i class="fa-solid fa-moon"></i> / <i class="fa-solid fa-sun"></i></button>
     </div>
 
     <h1>つぶやき掲示板</h1>
 
-    <c:if test="${not empty errorMsg}">
-        <p class="error">${errorMsg}</p>
-    </c:if>
-
     <!-- 投稿フォーム -->
     <div class="card">
         <form action="${pageContext.request.contextPath}/Main" method="post">
-            <label>名前：</label>
-            <input type="text" name="userName" placeholder="名前を入力" required />
+            <label>名前</label>
+            <input type="text" name="userName" required>
 
-            <label>つぶやき：</label>
-            <textarea name="text" rows="3" placeholder="内容を入力" required></textarea>
+            <label>つぶやき</label>
+            <textarea name="text" rows="3" required></textarea>
 
-            <input type="submit" value="投稿" />
+            <input type="submit" value="投稿" class="btn">
         </form>
     </div>
 
     <h2>投稿一覧</h2>
-
     <table>
-        <thead>
         <tr>
-            <th>ID</th>
-            <th>投稿者</th>
-            <th>内容</th>
-            <th>投稿日時</th>
-            <th colspan="2">操作</th>
+            <th>ID</th><th>投稿者</th><th>内容</th><th>日時</th><th>編集</th><th>削除</th>
         </tr>
-        </thead>
-        <tbody>
-        <c:forEach var="mutter" items="${mutterList}">
+        <c:forEach var="m" items="${mutterList}">
             <tr>
-                <td>${mutter.id}</td>
-                <td>${mutter.name}</td>
-                <td>${mutter.text}</td>
-                <td>${mutter.timestamp}</td>
-                <td>
-                    <a class="btn-link" href="${pageContext.request.contextPath}/Edit?id=${mutter.id}">編集</a>
-                </td>
-                <td>
-                    <a class="btn-link" href="${pageContext.request.contextPath}/Delete?id=${mutter.id}" 
-                       onclick="return confirmDelete();">削除</a>
-                </td>
+                <td>${m.id}</td>
+                <td>${m.name}</td>
+                <td>${m.text}</td>
+                <td>${m.timestamp}</td>
+                <td><a class="btn" href="${pageContext.request.contextPath}/Edit?id=${m.id}"><i class="fa-solid fa-pen"></i></a></td>
+                <td><a class="btn" href="${pageContext.request.contextPath}/Delete?id=${m.id}" onclick="return confirm('削除しますか？')"><i class="fa-solid fa-trash"></i></a></td>
             </tr>
         </c:forEach>
-        </tbody>
     </table>
 
 </div>
